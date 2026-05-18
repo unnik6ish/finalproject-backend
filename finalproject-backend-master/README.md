@@ -91,6 +91,5 @@ The React frontend for this project is available at:
 
 ## Author
 
-Unnikrishnan — Senior Production Analyst, Payments Technology  
-StackRoute Full Stack Developer Certification (2022)  
+Unnikrishnan
 [github.com/unnik6ish](https://github.com/unnik6ish)
