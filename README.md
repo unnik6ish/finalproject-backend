@@ -1,6 +1,6 @@
 # Loan Application Backend
 
-A RESTful API for a banking loan application portal, built with Spring Boot and secured with JWT authentication. Developed as a full-stack capstone project during the StackRoute Full Stack Developer training programme (NatWest Group, 2022).
+A RESTful API for a banking loan application portal, built with Spring Boot and secured with JWT authentication. Developed as a full-stack capstone project during the StackRoute Full Stack Developer training programme.
 
 ## Features
 
