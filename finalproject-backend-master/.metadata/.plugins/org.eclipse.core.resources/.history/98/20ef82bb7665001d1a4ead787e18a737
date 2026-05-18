@@ -1,0 +1,131 @@
+package com.example.demo.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.demo.exception.UserAlreadyExistException;
+import com.example.demo.exception.UserNotFoundException;
+import com.example.demo.model.InstLoanAppUsers;
+import com.example.demo.repository.WalletUserRepo;
+
+@ExtendWith(MockitoExtension.class)
+public class InstLoanAppUsersServiceTest {
+	
+	@Mock
+    private WalletUserRepo netRepo;
+	
+	@InjectMocks
+    private WalletUserServiceImpl  walletService;
+    private InstLoanAppUsers walletUsers,walletUsers1;
+    private List<InstLoanAppUsers> walletUserList;
+    private Optional optional;
+
+    
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+        walletUsers = new InstLoanAppUsers("Roger5646@gmail.com", "Roger", "chennai", (long) 1234567891, (long) (4597953), "Root12345");
+        walletUsers1 = new InstLoanAppUsers("Clem545@gmail.com", "Clem","Trichy",(long) 254136413, (long) (54641321),"Clement@04");
+        optional = Optional.of(walletUsers);
+    }
+
+
+    @AfterEach
+    public void tearDown() {
+    	walletUsers = null;
+    }
+
+    @Test
+    public void givenWalletUserToSaveThenShouldReturnSavedWalletUser() throws UserAlreadyExistException {
+        when(netRepo.save(any())).thenReturn(walletUsers);
+        assertEquals(walletUsers, walletService.registerUser(walletUsers));
+        verify(netRepo, times(1)).save(any());
+    }
+
+    @Test
+    public void givenWalletUserToSaveThenShouldNotReturnSavedWalletUser() {
+        when(netRepo.save(any())).thenThrow(new RuntimeException());
+        Assertions.assertThrows(RuntimeException.class,() -> {
+        	walletService.registerUser(walletUsers);
+        });
+        verify(netRepo, times(1)).save(any());
+    }
+
+    @Test
+    public void givenGetAllWalletUsersThenShouldReturnListOfAllWalletUsers() {
+    	netRepo.save(walletUsers);
+        //stubbing the mock to return specific data
+        when(netRepo.findAll()).thenReturn(walletUserList);
+        List<InstLoanAppUsers> walletUserList1 = walletService.getAllUser();
+        assertEquals(walletUserList, walletUserList1);
+        verify(netRepo, times(1)).save(walletUsers);
+        verify(netRepo, times(1)).findAll();
+    }
+
+    @Test
+    public void givenWalletUserIdThenShouldReturnRespectiveWalletUser() throws UserNotFoundException {
+        when(netRepo.findById(anyString())).thenReturn(Optional.of(walletUsers));
+        InstLoanAppUsers retrievedWalletUser = walletService.findUserbyId(walletUsers.getId());
+        verify(netRepo, times(1)).findById(anyString());
+
+    }
+
+   
+    @Test
+    void givenWalletUserIdToDeleteThenShouldReturnDeletedWalletUser() {
+        when(netRepo.findById(walletUsers.getId())).thenReturn(optional);
+        InstLoanAppUsers deletedNetflixUser = walletService.deleteAUser("Roger5646@gmail.com");
+        assertEquals("Roger5646@gmail.com", deletedNetflixUser.getId());
+
+        verify(netRepo, times(2)).findById(walletUsers.getId());
+        verify(netRepo, times(1)).deleteById(walletUsers.getId());
+    }
+
+    @Test
+    void givenWalletUserIdToDeleteThenShouldNotReturnDeletedNWalletUser() {
+        when(netRepo.findById(walletUsers.getId())).thenReturn(Optional.empty());
+        InstLoanAppUsers deletedNetflixUser = walletService.deleteAUser("Roger5646@gmail.com");
+        verify(netRepo, times(1)).findById(walletUsers.getId());
+    }
+    
+    @Test
+    public void giveWalletUserToUpdateThenShouldReturnUpdatedWalletUser() {
+        when(netRepo.findById(walletUsers.getId())).thenReturn(optional);
+        when(netRepo.save(walletUsers)).thenReturn(walletUsers);
+        walletUsers.setId("Roger5646@gmail.com");
+        InstLoanAppUsers walletUsers1 = walletService.updateAUser(walletUsers);
+        assertEquals(walletUsers1.getId(), "Roger5646@gmail.com");
+        verify(netRepo, times(1)).save(walletUsers);
+        verify(netRepo, times(2)).findById(walletUsers.getId());
+    }
+
+    @Test
+    public void givenWalletUserToUpdateThenShouldNotReturnUpdatedWalletUser() {
+        when(netRepo.findById(walletUsers.getId())).thenReturn(Optional.empty());
+        InstLoanAppUsers walletUsers1 = walletService.updateAUser(walletUsers);
+        assertNull(walletUsers1);
+        verify(netRepo, times(1)).findById(walletUsers.getId());
+    }
+
+
+}
